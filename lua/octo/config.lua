@@ -29,6 +29,8 @@ local M = {}
 
 ---@class OctoConfigUi
 ---@field use_signcolumn boolean
+---@field use_statuscolumn boolean
+---@field use_foldtext boolean
 
 ---@class OctoConfigIssues
 ---@field order_by OctoConfigOrderBy
@@ -114,7 +116,9 @@ function M.get_default_values()
       projects_v2 = false,
     },
     ui = {
-      use_signcolumn = true,
+      use_signcolumn = false,
+      use_statuscolumn = true,
+      use_foldtext = true,
     },
     issues = {
       order_by = {
@@ -389,7 +393,7 @@ function M.validate_config()
       validate_type(config.suppress_missing_scope.projects_v2, "supress_missing_scope.projects_v2", "boolean")
     end
     validate_type(config.gh_cmd, "gh_cmd", "string")
-    validate_type(config.gh_env, "gh_env", "table")
+    validate_type(config.gh_env, "gh_env", { "table", "function" })
     validate_type(config.reaction_viewer_hint_icon, "reaction_viewer_hint_icon", "string")
     validate_type(config.user_icon, "user_icon", "string")
     validate_type(config.comment_icon, "comment_icon", "string")
@@ -408,6 +412,8 @@ function M.validate_config()
     validate_type(config.default_merge_method, "default_merge_method", "string")
     if validate_type(config.ui, "ui", "table") then
       validate_type(config.ui.use_signcolumn, "ui.use_signcolumn", "boolean")
+      validate_type(config.ui.use_statuscolumn, "ui.use_statuscolumn", "boolean")
+      validate_type(config.ui.use_foldtext, "ui.use_foldtext", "boolean")
     end
     if validate_type(config.colors, "colors", "table") then
       for k, v in pairs(config.colors) do
@@ -472,6 +478,8 @@ function M.setup(opts)
       vim.log.levels.ERROR
     )
   end
+  M.values.ui.use_statuscolumn = M.values.ui.use_statuscolumn and vim.fn.has "nvim-0.9" == 1
+  M.values.ui.use_foldtext = M.values.ui.use_foldtext and vim.fn.has "nvim-0.10" == 1
 end
 
 return M

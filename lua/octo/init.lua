@@ -82,7 +82,9 @@ function M.load_buffer(bufnr)
     return
   end
   M.load(repo, kind, number, function(obj)
-    M.create_buffer(kind, obj, repo, false)
+    vim.api.nvim_buf_call(bufnr, function()
+      M.create_buffer(kind, obj, repo, false)
+    end)
   end)
 end
 
@@ -119,10 +121,10 @@ function M.load(repo, kind, number, cb)
   }
 end
 
-function M.render_signcolumn()
+function M.render_signs()
   local bufnr = vim.api.nvim_get_current_buf()
   local buffer = octo_buffers[bufnr]
-  buffer:render_signcolumn()
+  buffer:render_signs()
 end
 
 function M.on_cursor_hold()

@@ -9,6 +9,7 @@ local graphql = require "octo.gh.graphql"
 local signs = require "octo.ui.signs"
 local writers = require "octo.ui.writers"
 local utils = require "octo.utils"
+local vim = vim
 
 local M = {}
 
@@ -237,15 +238,22 @@ end
 function OctoBuffer:configure()
   -- configure buffer
   vim.api.nvim_buf_call(self.bufnr, function()
-    local use_signcolumn = config.values.ui.use_signcolumn
     vim.cmd [[setlocal filetype=octo]]
     vim.cmd [[setlocal buftype=acwrite]]
     vim.cmd [[setlocal omnifunc=v:lua.octo_omnifunc]]
     vim.cmd [[setlocal conceallevel=2]]
     vim.cmd [[setlocal nonumber norelativenumber nocursorline wrap]]
-    if use_signcolumn then
+
+    if config.values.ui.use_signcolumn then
       vim.cmd [[setlocal signcolumn=yes]]
-      autocmds.update_signcolumn(self.bufnr)
+      autocmds.update_signs(self.bufnr)
+    end
+    if config.values.ui.use_statuscolumn then
+      vim.opt_local.statuscolumn = [[%!v:lua.require'octo.ui.statuscolumn'.statuscolumn()]]
+      autocmds.update_signs(self.bufnr)
+    end
+    if config.values.ui.use_foldtext then
+      vim.opt_local.foldtext = [[v:lua.require'octo.folds'.foldtext()]]
     end
   end)
 
@@ -389,7 +397,7 @@ function OctoBuffer:do_save_title_and_body()
             self.bodyMetadata = desc_metadata
           end
 
-          self:render_signcolumn()
+          self:render_signs()
           utils.info "Saved!"
         end
       end,
@@ -421,7 +429,7 @@ function OctoBuffer:do_add_issue_comment(comment_metadata)
               break
             end
           end
-          self:render_signcolumn()
+          self:render_signs()
         end
       end
     end,
@@ -464,7 +472,7 @@ function OctoBuffer:do_add_thread_comment(comment_metadata)
             review:update_threads(threads)
           end
 
-          self:render_signcolumn()
+          self:render_signs()
 
           -- update thread map
           local thread_id
@@ -568,7 +576,7 @@ function OctoBuffer:do_add_new_thread(comment_metadata)
               if review then
                 review:update_threads(threads)
               end
-              self:render_signcolumn()
+              self:render_signs()
             end
           else
             utils.error "Failed to create thread"
@@ -665,7 +673,7 @@ function OctoBuffer:do_add_new_thread(comment_metadata)
                   local threads = resp.comment.pullRequest.reviewThreads.nodes
                   review:update_threads(threads)
                 end
-                self:render_signcolumn()
+                self:render_signs()
               end
             else
               utils.error "Failed to create thread"
@@ -713,7 +721,7 @@ function OctoBuffer:do_add_pull_request_comment(comment_metadata)
                 break
               end
             end
-            self:render_signcolumn()
+            self:render_signs()
           end
         else
           utils.error "Failed to create thread"
@@ -765,7 +773,7 @@ function OctoBuffer:do_update_comment(comment_metadata)
               break
             end
           end
-          self:render_signcolumn()
+          self:render_signs()
         end
       end
     end,
@@ -797,10 +805,11 @@ function OctoBuffer:update_metadata()
   end
 end
 
----Renders the signcolumn
-function OctoBuffer:render_signcolumn()
+---Renders the signs in the signcolumn or statuscolumn
+function OctoBuffer:render_signs()
   local use_signcolumn = config.values.ui.use_signcolumn
-  if not use_signcolumn or not self.ready then
+  local use_statuscolumn = config.values.ui.use_statuscolumn
+  if not self.ready or (not use_statuscolumn and not use_signcolumn) then
     return
   end
 
