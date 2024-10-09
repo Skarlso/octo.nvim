@@ -226,6 +226,9 @@ function M.setup()
           utils.error "Please start or resume a review first"
         end
       end,
+      thread = function()
+        require("octo.reviews.thread-panel").show_review_threads { jump_to_buffer = true }
+      end,
     },
     gist = {
       list = function(...)
@@ -348,6 +351,12 @@ function M.setup()
       utils.get_pull_request_for_current_branch(function(pr)
         vim.cmd("e " .. utils.get_pull_request_uri(pr.repo, pr.number))
       end)
+    end,
+  })
+
+  setmetatable(M.commands.review, {
+    __call = function(_)
+      reviews.start_or_resume_review()
     end,
   })
 end

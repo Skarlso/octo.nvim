@@ -262,7 +262,7 @@ M.unmark_file_as_viewed_mutation = [[
 -- https://docs.github.com/en/graphql/reference/mutations#addpullrequestreview
 M.submit_pull_request_review_mutation = [[
   mutation {
-    submitPullRequestReview(input: {pullRequestReviewId: "%s", event: %s, body: "%s"}) {
+    submitPullRequestReview(input: {pullRequestReviewId: "%s", event: %s, body: """%s"""}) {
       pullRequestReview {
         id
         state
@@ -285,7 +285,7 @@ mutation {
 -- https://docs.github.com/en/graphql/reference/mutations#addpullrequestreviewthread
 M.add_pull_request_review_thread_mutation = [[
 mutation {
-  addPullRequestReviewThread(input: { pullRequestReviewId: "%s", body: "%s", path: "%s", side: %s, line:%d}) {
+  addPullRequestReviewThread(input: { pullRequestReviewId: "%s", body: """%s""", path: "%s", side: %s, line:%d}) {
     thread {
       id
       comments(last:100) {
@@ -379,7 +379,7 @@ mutation {
 -- https://docs.github.com/en/graphql/reference/mutations#addpullrequestreviewthread
 M.add_pull_request_review_multiline_thread_mutation = [[
 mutation {
-  addPullRequestReviewThread(input: { pullRequestReviewId: "%s", body: "%s", path: "%s", startSide: %s, side: %s, startLine: %d, line:%d}) {
+  addPullRequestReviewThread(input: { pullRequestReviewId: "%s", body: """%s""", path: "%s", startSide: %s, side: %s, startLine: %d, line:%d}) {
     thread {
       id
       comments(last:100) {
@@ -473,7 +473,7 @@ mutation {
 -- https://docs.github.com/en/graphql/reference/mutations#addcomment
 M.add_issue_comment_mutation = [[
   mutation {
-    addComment(input: {subjectId: "%s", body: "%s"}) {
+    addComment(input: {subjectId: "%s", body: """%s"""}) {
       commentEdge {
         node {
           id
@@ -487,7 +487,7 @@ M.add_issue_comment_mutation = [[
 -- https://docs.github.com/en/graphql/reference/mutations#updateissuecomment
 M.update_issue_comment_mutation = [[
   mutation {
-    updateIssueComment(input: {id: "%s", body: "%s"}) {
+    updateIssueComment(input: {id: "%s", body: """%s"""}) {
       issueComment {
         id
         body
@@ -499,7 +499,7 @@ M.update_issue_comment_mutation = [[
 -- https://docs.github.com/en/graphql/reference/mutations#updatepullrequestreviewcomment
 M.update_pull_request_review_comment_mutation = [[
   mutation {
-    updatePullRequestReviewComment(input: {pullRequestReviewCommentId: "%s", body: "%s"}) {
+    updatePullRequestReviewComment(input: {pullRequestReviewCommentId: "%s", body: """%s"""}) {
       pullRequestReviewComment {
         id
         body
@@ -561,7 +561,7 @@ M.update_pull_request_review_comment_mutation = [[
 -- https://docs.github.com/en/graphql/reference/mutations#updatepullrequestreview
 M.update_pull_request_review_mutation = [[
   mutation {
-    updatePullRequestReview(input: {pullRequestReviewId: "%s", body: "%s"}) {
+    updatePullRequestReview(input: {pullRequestReviewId: "%s", body: """%s"""}) {
       pullRequestReview {
         id
         state
@@ -574,7 +574,7 @@ M.update_pull_request_review_mutation = [[
 -- https://docs.github.com/en/graphql/reference/mutations#addpullrequestreviewcomment
 M.add_pull_request_review_comment_mutation = [[
   mutation {
-    addPullRequestReviewComment(input: {inReplyTo: "%s", body: "%s", pullRequestReviewId: "%s"}) {
+    addPullRequestReviewComment(input: {inReplyTo: "%s", body: """%s""", pullRequestReviewId: "%s"}) {
       comment {
         id
         body
@@ -636,7 +636,7 @@ M.add_pull_request_review_comment_mutation = [[
 -- https://docs.github.com/en/graphql/reference/mutations#addpullrequestreviewcomment
 M.add_pull_request_review_commit_thread_mutation = [[
   mutation {
-    addPullRequestReviewComment(input: {commitOID: "%s", body: "%s", pullRequestReviewId: "%s", path: "%s", position: %d }) {
+    addPullRequestReviewComment(input: {commitOID: "%s", body: """%s""", pullRequestReviewId: "%s", path: "%s", position: %d }) {
       comment {
         id
         body
@@ -698,7 +698,7 @@ M.add_pull_request_review_commit_thread_mutation = [[
 -- M.add_pull_request_review_comment_mutation =
 -- [[
 --   mutation {
---     addPullRequestReviewThreadReply(input: { pullRequestReviewThreadId: "%s", body: "%s"}) {
+--     addPullRequestReviewThreadReply(input: { pullRequestReviewThreadId: "%s", body: """%s"""}) {
 --       comment{
 --         id
 --         body
@@ -781,7 +781,7 @@ M.delete_pull_request_review_comment_mutation = [[
 -- https://docs.github.com/en/free-pro-team@latest/graphql/reference/mutations#updateissue
 M.update_issue_mutation = [[
   mutation {
-    updateIssue(input: {id: "%s", title: "%s", body: "%s"}) {
+    updateIssue(input: {id: "%s", title: """%s""", body: """%s"""}) {
       issue {
         id
         number
@@ -796,7 +796,7 @@ M.update_issue_mutation = [[
 -- https://docs.github.com/en/free-pro-team@latest/graphql/reference/mutations#createissue
 M.create_issue_mutation = [[
   mutation {
-    createIssue(input: {repositoryId: "%s", title: "%s", body: "%s"}) {
+    createIssue(input: {repositoryId: "%s", title: """%s""", body: """%s"""}) {
       issue {
         id
         number
@@ -934,7 +934,7 @@ M.create_issue_mutation = [[
 -- https://docs.github.com/en/free-pro-team@latest/graphql/reference/mutations#updateissue
 M.update_issue_mutation = [[
   mutation {
-    updateIssue(input: {id: "%s", title: "%s", body: "%s"}) {
+    updateIssue(input: {id: "%s", title: """%s""", body: """%s"""}) {
       issue {
         id
         number
@@ -1094,7 +1094,7 @@ M.update_issue_state_mutation = [[
 -- https://docs.github.com/en/free-pro-team@latest/graphql/reference/mutations#updatepullrequest
 M.update_pull_request_mutation = [[
   mutation {
-    updatePullRequest(input: {pullRequestId: "%s", title: "%s", body: "%s"}) {
+    updatePullRequest(input: {pullRequestId: "%s", title: """%s""", body: """%s"""}) {
       pullRequest {
         id
         number
@@ -2141,7 +2141,7 @@ query($endCursor: String) {
 
 M.search_query = [[
 query {
-  search(query: "%s", type: ISSUE, last: 100) {
+  search(query: """%s""", type: ISSUE, last: 100) {
     nodes {
       ... on Issue{
         __typename
@@ -2377,7 +2377,7 @@ M.delete_project_v2_item_mutation = [[
 -- requires application/vnd.github.bane-preview+json
 M.create_label_mutation = [[
   mutation {
-    createLabel(input: {repositoryId: "%s", name: "%s", description: "%s", color: "%s"}) {
+    createLabel(input: {repositoryId: "%s", name: "%s", description: """%s""", color: "%s"}) {
       label {
         id
         name
@@ -2679,9 +2679,45 @@ query {
 }
 ]]
 
+M.mentionable_users_query = [[
+query($endCursor: String) {
+  repository(owner: "%s", name: "%s") {
+      mentionableUsers(first: 100, after: $endCursor) {
+      pageInfo {
+        hasNextPage
+        endCursor
+        startCursor
+      }
+      nodes {
+        id
+        login
+      }
+    }
+  }
+}
+]]
+
+M.assignable_users_query = [[
+query($endCursor: String) {
+  repository(owner: "%s", name: "%s") {
+    assignableUsers(first: 100, after: $endCursor) {
+      pageInfo {
+        hasNextPage
+        endCursor
+        startCursor
+      }
+      nodes {
+        id
+        login
+      }
+    }
+  }
+}
+]]
+
 M.users_query = [[
 query($endCursor: String) {
-  search(query: "%s", type: USER, first: 100) {
+  search(query: """%s""", type: USER, first: 100) {
     nodes {
       ... on User {
         id
@@ -2828,7 +2864,7 @@ query($endCursor: String) {
 -- https://docs.github.com/en/graphql/reference/mutations#createpullrequest
 M.create_pr_mutation = [[
   mutation {
-    createPullRequest(input: {baseRefName: "%s", headRefName: "%s", repositoryId: "%s", title: "%s", body: "%s", draft: %s}) {
+    createPullRequest(input: {baseRefName: "%s", headRefName: "%s", repositoryId: "%s", title: """%s""", body: """%s""", draft: %s}) {
       pullRequest {
         id
         number
@@ -3212,8 +3248,7 @@ return function(query, ...)
   local escaped = {}
   for _, v in ipairs { ... } do
     if type(v) == "string" and opts.escape then
-      local encoded = escape_char(v)
-      table.insert(escaped, encoded)
+      table.insert(escaped, escape_char(v))
     else
       table.insert(escaped, v)
     end

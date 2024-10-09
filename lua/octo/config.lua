@@ -35,6 +35,9 @@ local M = {}
 ---@class OctoConfigIssues
 ---@field order_by OctoConfigOrderBy
 
+---@class OctoConfigReviews
+---@field auto_show_threads boolean
+
 ---@class OctoConfigPR
 ---@field order_by OctoConfigOrderBy
 ---@field always_select_remote_on_create boolean
@@ -53,6 +56,7 @@ local M = {}
 ---@field default_merge_method string
 ---@field ssh_aliases {[string]:string}
 ---@field reaction_viewer_hint_icon string
+---@field users string
 ---@field user_icon string
 ---@field comment_icon string
 ---@field outdated_icon string
@@ -72,6 +76,7 @@ local M = {}
 ---@field suppress_missing_scope OctoMissingScopeConfig
 ---@field ui OctoConfigUi
 ---@field issues OctoConfigIssues
+---@field reviews OctoConfigReviews
 ---@field pull_requests OctoConfigPR
 ---@field file_panel OctoConfigFilePanel
 ---@field colors OctoConfigColors
@@ -96,6 +101,7 @@ function M.get_default_values()
     default_merge_method = "commit",
     ssh_aliases = {},
     reaction_viewer_hint_icon = " ",
+    users = "search",
     user_icon = " ",
     comment_icon = "▎",
     outdated_icon = "󰅒 ",
@@ -126,6 +132,9 @@ function M.get_default_values()
         direction = "DESC",
       },
     },
+    reviews = {
+      auto_show_threads = true,
+    },
     pull_requests = {
       order_by = {
         field = "CREATED_AT",
@@ -154,74 +163,74 @@ function M.get_default_values()
     mappings_disable_default = false,
     mappings = {
       issue = {
-        close_issue = { lhs = "<space>ic", desc = "close issue" },
-        reopen_issue = { lhs = "<space>io", desc = "reopen issue" },
-        list_issues = { lhs = "<space>il", desc = "list open issues on same repo" },
+        close_issue = { lhs = "<leader>ic", desc = "close issue" },
+        reopen_issue = { lhs = "<leader>io", desc = "reopen issue" },
+        list_issues = { lhs = "<leader>il", desc = "list open issues on same repo" },
         reload = { lhs = "<C-r>", desc = "reload issue" },
         open_in_browser = { lhs = "<C-b>", desc = "open issue in browser" },
         copy_url = { lhs = "<C-y>", desc = "copy url to system clipboard" },
-        add_assignee = { lhs = "<space>aa", desc = "add assignee" },
-        remove_assignee = { lhs = "<space>ad", desc = "remove assignee" },
-        create_label = { lhs = "<space>lc", desc = "create label" },
-        add_label = { lhs = "<space>la", desc = "add label" },
-        remove_label = { lhs = "<space>ld", desc = "remove label" },
-        goto_issue = { lhs = "<space>gi", desc = "navigate to a local repo issue" },
-        add_comment = { lhs = "<space>ca", desc = "add comment" },
-        delete_comment = { lhs = "<space>cd", desc = "delete comment" },
+        add_assignee = { lhs = "<leader>aa", desc = "add assignee" },
+        remove_assignee = { lhs = "<leader>ad", desc = "remove assignee" },
+        create_label = { lhs = "<leader>lc", desc = "create label" },
+        add_label = { lhs = "<leader>la", desc = "add label" },
+        remove_label = { lhs = "<leader>ld", desc = "remove label" },
+        goto_issue = { lhs = "<leader>gi", desc = "navigate to a local repo issue" },
+        add_comment = { lhs = "<leader>ca", desc = "add comment" },
+        delete_comment = { lhs = "<leader>cd", desc = "delete comment" },
         next_comment = { lhs = "]c", desc = "go to next comment" },
         prev_comment = { lhs = "[c", desc = "go to previous comment" },
-        react_hooray = { lhs = "<space>rp", desc = "add/remove 🎉 reaction" },
-        react_heart = { lhs = "<space>rh", desc = "add/remove ❤️ reaction" },
-        react_eyes = { lhs = "<space>re", desc = "add/remove 👀 reaction" },
-        react_thumbs_up = { lhs = "<space>r+", desc = "add/remove 👍 reaction" },
-        react_thumbs_down = { lhs = "<space>r-", desc = "add/remove 👎 reaction" },
-        react_rocket = { lhs = "<space>rr", desc = "add/remove 🚀 reaction" },
-        react_laugh = { lhs = "<space>rl", desc = "add/remove 😄 reaction" },
-        react_confused = { lhs = "<space>rc", desc = "add/remove 😕 reaction" },
+        react_hooray = { lhs = "<leader>rp", desc = "add/remove 🎉 reaction" },
+        react_heart = { lhs = "<leader>rh", desc = "add/remove ❤️ reaction" },
+        react_eyes = { lhs = "<leader>re", desc = "add/remove 👀 reaction" },
+        react_thumbs_up = { lhs = "<leader>r+", desc = "add/remove 👍 reaction" },
+        react_thumbs_down = { lhs = "<leader>r-", desc = "add/remove 👎 reaction" },
+        react_rocket = { lhs = "<leader>rr", desc = "add/remove 🚀 reaction" },
+        react_laugh = { lhs = "<leader>rl", desc = "add/remove 😄 reaction" },
+        react_confused = { lhs = "<leader>rc", desc = "add/remove 😕 reaction" },
       },
       pull_request = {
-        checkout_pr = { lhs = "<space>po", desc = "checkout PR" },
-        merge_pr = { lhs = "<space>pm", desc = "merge commit PR" },
-        squash_and_merge_pr = { lhs = "<space>psm", desc = "squash and merge PR" },
-        rebase_and_merge_pr = { lhs = "<space>prm", desc = "rebase and merge PR" },
-        list_commits = { lhs = "<space>pc", desc = "list PR commits" },
-        list_changed_files = { lhs = "<space>pf", desc = "list PR changed files" },
-        show_pr_diff = { lhs = "<space>pd", desc = "show PR diff" },
-        add_reviewer = { lhs = "<space>va", desc = "add reviewer" },
-        remove_reviewer = { lhs = "<space>vd", desc = "remove reviewer request" },
-        close_issue = { lhs = "<space>ic", desc = "close PR" },
-        reopen_issue = { lhs = "<space>io", desc = "reopen PR" },
-        list_issues = { lhs = "<space>il", desc = "list open issues on same repo" },
+        checkout_pr = { lhs = "<leader>po", desc = "checkout PR" },
+        merge_pr = { lhs = "<leader>pm", desc = "merge commit PR" },
+        squash_and_merge_pr = { lhs = "<leader>psm", desc = "squash and merge PR" },
+        rebase_and_merge_pr = { lhs = "<leader>prm", desc = "rebase and merge PR" },
+        list_commits = { lhs = "<leader>pc", desc = "list PR commits" },
+        list_changed_files = { lhs = "<leader>pf", desc = "list PR changed files" },
+        show_pr_diff = { lhs = "<leader>pd", desc = "show PR diff" },
+        add_reviewer = { lhs = "<leader>va", desc = "add reviewer" },
+        remove_reviewer = { lhs = "<leader>vd", desc = "remove reviewer request" },
+        close_issue = { lhs = "<leader>ic", desc = "close PR" },
+        reopen_issue = { lhs = "<leader>io", desc = "reopen PR" },
+        list_issues = { lhs = "<leader>il", desc = "list open issues on same repo" },
         reload = { lhs = "<C-r>", desc = "reload PR" },
         open_in_browser = { lhs = "<C-b>", desc = "open PR in browser" },
         copy_url = { lhs = "<C-y>", desc = "copy url to system clipboard" },
         goto_file = { lhs = "gf", desc = "go to file" },
-        add_assignee = { lhs = "<space>aa", desc = "add assignee" },
-        remove_assignee = { lhs = "<space>ad", desc = "remove assignee" },
-        create_label = { lhs = "<space>lc", desc = "create label" },
-        add_label = { lhs = "<space>la", desc = "add label" },
-        remove_label = { lhs = "<space>ld", desc = "remove label" },
-        goto_issue = { lhs = "<space>gi", desc = "navigate to a local repo issue" },
-        add_comment = { lhs = "<space>ca", desc = "add comment" },
-        delete_comment = { lhs = "<space>cd", desc = "delete comment" },
+        add_assignee = { lhs = "<leader>aa", desc = "add assignee" },
+        remove_assignee = { lhs = "<leader>ad", desc = "remove assignee" },
+        create_label = { lhs = "<leader>lc", desc = "create label" },
+        add_label = { lhs = "<leader>la", desc = "add label" },
+        remove_label = { lhs = "<leader>ld", desc = "remove label" },
+        goto_issue = { lhs = "<leader>gi", desc = "navigate to a local repo issue" },
+        add_comment = { lhs = "<leader>ca", desc = "add comment" },
+        delete_comment = { lhs = "<leader>cd", desc = "delete comment" },
         next_comment = { lhs = "]c", desc = "go to next comment" },
         prev_comment = { lhs = "[c", desc = "go to previous comment" },
-        react_hooray = { lhs = "<space>rp", desc = "add/remove 🎉 reaction" },
-        react_heart = { lhs = "<space>rh", desc = "add/remove ❤️ reaction" },
-        react_eyes = { lhs = "<space>re", desc = "add/remove 👀 reaction" },
-        react_thumbs_up = { lhs = "<space>r+", desc = "add/remove 👍 reaction" },
-        react_thumbs_down = { lhs = "<space>r-", desc = "add/remove 👎 reaction" },
-        react_rocket = { lhs = "<space>rr", desc = "add/remove 🚀 reaction" },
-        react_laugh = { lhs = "<space>rl", desc = "add/remove 😄 reaction" },
-        react_confused = { lhs = "<space>rc", desc = "add/remove 😕 reaction" },
-        review_start = { lhs = "<space>vs", desc = "start a review for the current PR" },
-        review_resume = { lhs = "<space>vr", desc = "resume a pending review for the current PR" },
+        react_hooray = { lhs = "<leader>rp", desc = "add/remove 🎉 reaction" },
+        react_heart = { lhs = "<leader>rh", desc = "add/remove ❤️ reaction" },
+        react_eyes = { lhs = "<leader>re", desc = "add/remove 👀 reaction" },
+        react_thumbs_up = { lhs = "<leader>r+", desc = "add/remove 👍 reaction" },
+        react_thumbs_down = { lhs = "<leader>r-", desc = "add/remove 👎 reaction" },
+        react_rocket = { lhs = "<leader>rr", desc = "add/remove 🚀 reaction" },
+        react_laugh = { lhs = "<leader>rl", desc = "add/remove 😄 reaction" },
+        react_confused = { lhs = "<leader>rc", desc = "add/remove 😕 reaction" },
+        review_start = { lhs = "<leader>vs", desc = "start a review for the current PR" },
+        review_resume = { lhs = "<leader>vr", desc = "resume a pending review for the current PR" },
       },
       review_thread = {
-        goto_issue = { lhs = "<space>gi", desc = "navigate to a local repo issue" },
-        add_comment = { lhs = "<space>ca", desc = "add comment" },
-        add_suggestion = { lhs = "<space>sa", desc = "add suggestion" },
-        delete_comment = { lhs = "<space>cd", desc = "delete comment" },
+        goto_issue = { lhs = "<leader>gi", desc = "navigate to a local repo issue" },
+        add_comment = { lhs = "<leader>ca", desc = "add comment" },
+        add_suggestion = { lhs = "<leader>sa", desc = "add suggestion" },
+        delete_comment = { lhs = "<leader>cd", desc = "delete comment" },
         next_comment = { lhs = "]c", desc = "go to next comment" },
         prev_comment = { lhs = "[c", desc = "go to previous comment" },
         select_next_entry = { lhs = "]q", desc = "move to next changed file" },
@@ -229,14 +238,14 @@ function M.get_default_values()
         select_first_entry = { lhs = "[Q", desc = "move to first changed file" },
         select_last_entry = { lhs = "]Q", desc = "move to last changed file" },
         close_review_tab = { lhs = "<C-c>", desc = "close review tab" },
-        react_hooray = { lhs = "<space>rp", desc = "add/remove 🎉 reaction" },
-        react_heart = { lhs = "<space>rh", desc = "add/remove ❤️ reaction" },
-        react_eyes = { lhs = "<space>re", desc = "add/remove 👀 reaction" },
-        react_thumbs_up = { lhs = "<space>r+", desc = "add/remove 👍 reaction" },
-        react_thumbs_down = { lhs = "<space>r-", desc = "add/remove 👎 reaction" },
-        react_rocket = { lhs = "<space>rr", desc = "add/remove 🚀 reaction" },
-        react_laugh = { lhs = "<space>rl", desc = "add/remove 😄 reaction" },
-        react_confused = { lhs = "<space>rc", desc = "add/remove 😕 reaction" },
+        react_hooray = { lhs = "<leader>rp", desc = "add/remove 🎉 reaction" },
+        react_heart = { lhs = "<leader>rh", desc = "add/remove ❤️ reaction" },
+        react_eyes = { lhs = "<leader>re", desc = "add/remove 👀 reaction" },
+        react_thumbs_up = { lhs = "<leader>r+", desc = "add/remove 👍 reaction" },
+        react_thumbs_down = { lhs = "<leader>r-", desc = "add/remove 👎 reaction" },
+        react_rocket = { lhs = "<leader>rr", desc = "add/remove 🚀 reaction" },
+        react_laugh = { lhs = "<leader>rl", desc = "add/remove 😄 reaction" },
+        react_confused = { lhs = "<leader>rc", desc = "add/remove 😕 reaction" },
       },
       submit_win = {
         approve_review = { lhs = "<C-a>", desc = "approve review" },
@@ -247,8 +256,8 @@ function M.get_default_values()
       review_diff = {
         submit_review = { lhs = "<leader>vs", desc = "submit review" },
         discard_review = { lhs = "<leader>vd", desc = "discard review" },
-        add_review_comment = { lhs = "<space>ca", desc = "add a new review comment" },
-        add_review_suggestion = { lhs = "<space>sa", desc = "add a new review suggestion" },
+        add_review_comment = { lhs = "<leader>ca", desc = "add a new review comment" },
+        add_review_suggestion = { lhs = "<leader>sa", desc = "add a new review suggestion" },
         focus_files = { lhs = "<leader>e", desc = "move focus to changed file panel" },
         toggle_files = { lhs = "<leader>b", desc = "hide/show changed files panel" },
         next_thread = { lhs = "]t", desc = "move to next thread" },
@@ -346,6 +355,25 @@ function M.validate_config()
     validate_type(config.picker_config.mappings, "picker_config.mappings", "table")
   end
 
+  local function validate_user_search()
+    if not validate_type(config.users, "users", "string") then
+      return
+    end
+
+    local valid_finders = { "search", "mentionable", "assignable" }
+
+    if not vim.tbl_contains(valid_finders, config.users) then
+      err(
+        "users." .. config.users,
+        string.format(
+          "Expected a valid user finder, received '%s', which is not a supported finder! Valid finders: %s",
+          config.users,
+          table.concat(valid_finders, ", ")
+        )
+      )
+    end
+  end
+
   local function validate_aliases()
     if not validate_type(config.ssh_aliases, "ssh_aliases", "table") then
       return
@@ -395,6 +423,7 @@ function M.validate_config()
     validate_type(config.gh_cmd, "gh_cmd", "string")
     validate_type(config.gh_env, "gh_env", { "table", "function" })
     validate_type(config.reaction_viewer_hint_icon, "reaction_viewer_hint_icon", "string")
+    validate_user_search()
     validate_type(config.user_icon, "user_icon", "string")
     validate_type(config.comment_icon, "comment_icon", "string")
     validate_type(config.outdated_icon, "outdated_icon", "string")
