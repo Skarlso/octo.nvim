@@ -1025,6 +1025,11 @@ function M.write_details(bufnr, issue, update, include_status)
     }
     table.insert(details, branches_vt)
 
+    -- stacked PRs
+    for _, stack_line in ipairs(M.build_stack_details(issue.stackEntry)) do
+      table.insert(details, stack_line)
+    end
+
     -- review decision
     if issue.reviewDecision and issue.reviewDecision ~= vim.NIL then
       local decision_vt = {
