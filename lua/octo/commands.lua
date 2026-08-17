@@ -652,7 +652,12 @@ function M.setup()
         M.reload { verbose = true }
       end,
       browser = function()
-        navigation.open_in_browser()
+        local buffer = utils.get_current_buffer()
+        if buffer and buffer:isPullRequest() then
+          navigation.open_in_browser()
+        else
+          pcall(vim.cmd, "silent !gh pr view --web")
+        end
       end,
       url = function()
         M.copy_url()

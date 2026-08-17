@@ -36,22 +36,24 @@ function M.open_in_browser(kind, repo, number)
     return
   end
 
+  local function repo_ref(repo)
+    if remote == "github.com" then
+      return repo
+    end
+    return remote .. "/" .. repo
+  end
+
   if not kind and not repo then
     local buffer = utils.get_current_buffer()
     if not buffer then
-      local owner_repo = utils.get_remote_name()
-      if not owner_repo then
-        utils.error "No remote repository found"
-        return
-      end
-      cmd = string.format("gh repo view --web %s", owner_repo)
+      cmd = "gh pr view --web"
       ---@diagnostic disable-next-line: param-type-mismatch
       return pcall(vim.cmd, "silent !" .. cmd)
     end
     if buffer:isPullRequest() then
-      cmd = string.format("gh pr view --web -R %s/%s %d", remote, buffer.repo, buffer.number)
+      cmd = string.format("gh pr view --web -R %s %d", repo_ref(buffer.repo), buffer.number)
     elseif buffer:isIssue() then
-      cmd = string.format("gh issue view --web -R %s/%s %d", remote, buffer.repo, buffer.number)
+      cmd = string.format("gh issue view --web -R %s %d", repo_ref(buffer.repo), buffer.number)
     elseif buffer:isRepo() then
       cmd = string.format("gh repo view --web %s/%s", remote, buffer.repo)
     elseif buffer:isDiscussion() then
@@ -68,9 +70,9 @@ function M.open_in_browser(kind, repo, number)
     end
   else
     if kind == "pr" or kind == "pull_request" then
-      cmd = string.format("gh pr view --web -R %s/%s %d", remote, repo, number)
+      cmd = string.format("gh pr view --web -R %s %d", repo_ref(repo), number)
     elseif kind == "issue" then
-      cmd = string.format("gh issue view --web -R %s/%s %d", remote, repo, number)
+      cmd = string.format("gh issue view --web -R %s %d", repo_ref(repo), number)
     elseif kind == "repo" then
       assert(repo, "repo is required")
       cmd = string.format("gh repo view --web %s", repo.url)
