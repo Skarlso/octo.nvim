@@ -29,4 +29,85 @@ describe("stacked PRs", function()
       assert.is_nil(queries.pull_request:find("stackEntry", 1, true))
     end)
   end)
+
+  describe("build_stack_details", function()
+    local writers = require "octo.ui.writers"
+    local utils = require "octo.utils"
+
+    local function line_text(line)
+      local s = ""
+      for _, chunk in ipairs(line) do
+        s = s .. chunk[1]
+      end
+      return s
+    end
+
+    local function make_stack_entry()
+      return {
+        position = 2,
+        stack = {
+          id = "S_1",
+          number = 350,
+          size = 5,
+          baseRefName = "main",
+          entries = {
+            nodes = {
+              {
+                position = 1,
+                pullRequest = { number = 330, title = "Bottom PR", state = "MERGED", isDraft = false, url = "" },
+              },
+              {
+                position = 3,
+                pullRequest = { number = 343, title = "Top PR", state = "OPEN", isDraft = true, url = "" },
+              },
+              {
+                position = 2,
+                pullRequest = { number = 333, title = "Current PR", state = "OPEN", isDraft = false, url = "" },
+              },
+            },
+          },
+        },
+      }
+    end
+
+    it("returns no lines when the PR is not part of a stack", function()
+      eq({}, writers.build_stack_details(nil))
+      eq({}, writers.build_stack_details(vim.NIL))
+    end)
+
+    it("renders a header with position, size and base branch", function()
+      local lines = writers.build_stack_details(make_stack_entry())
+      eq("Stack: 2/5 (into main)", line_text(lines[1]))
+    end)
+
+    it("renders one line per entry, top of the stack first", function()
+      local lines = writers.build_stack_details(make_stack_entry())
+      eq(4, #lines)
+      assert.is_truthy(line_text(lines[2]):find("#343 Top PR", 1, true))
+      assert.is_truthy(line_text(lines[3]):find("#333 Current PR", 1, true))
+      assert.is_truthy(line_text(lines[4]):find("#330 Bottom PR", 1, true))
+    end)
+
+    it("marks the current PR with an arrow", function()
+      local lines = writers.build_stack_details(make_stack_entry())
+      assert.is_truthy(vim.startswith(line_text(lines[3]), "  ▶ "))
+      assert.is_truthy(vim.startswith(line_text(lines[2]), "    "))
+      assert.is_truthy(vim.startswith(line_text(lines[4]), "    "))
+    end)
+
+    it("uses the PR state icons", function()
+      local lines = writers.build_stack_details(make_stack_entry())
+      assert.is_truthy(line_text(lines[2]):find(utils.icons.pull_request.draft[1], 1, true))
+      assert.is_truthy(line_text(lines[3]):find(utils.icons.pull_request.open[1], 1, true))
+      assert.is_truthy(line_text(lines[4]):find(utils.icons.pull_request.merged[1], 1, true))
+    end)
+
+    it("handles inaccessible pull requests", function()
+      local stack_entry = make_stack_entry()
+      stack_entry.stack.entries.nodes[2].pullRequest = vim.NIL
+      local lines = writers.build_stack_details(stack_entry)
+      eq(4, #lines)
+      assert.is_truthy(line_text(lines[2]):find("not accessible", 1, true))
+    end)
+  end)
 end)

@@ -719,6 +719,58 @@ end
 ---@param issue octo.PullRequest|octo.Issue
 ---@param update? true
 ---@param include_status? boolean
+---Build virtual-text detail lines for the stack a PR belongs to.
+---Returns an empty list when the PR is not part of a stack.
+---@param stack_entry? octo.StackEntryHead
+---@return [string, string][][]
+function M.build_stack_details(stack_entry)
+  local lines = {} ---@type [string, string][][]
+  if utils.is_blank(stack_entry) or utils.is_blank(stack_entry.stack) then
+    return lines
+  end
+  local stack = stack_entry.stack
+
+  table.insert(lines, {
+    { "Stack: ", "OctoDetailsLabel" },
+    { string.format("%d/%d", stack_entry.position, stack.size), "OctoDetailsValue" },
+    { " (into ", "OctoDetailsLabel" },
+    { stack.baseRefName, "OctoDetailsValue" },
+    { ")", "OctoDetailsLabel" },
+  })
+
+  local entries = vim.list_slice(stack.entries.nodes)
+  -- Top of the stack first, base branch last, matching the GitHub UI
+  table.sort(entries, function(a, b)
+    return a.position > b.position
+  end)
+
+  for _, entry in ipairs(entries) do
+    local is_current = entry.position == stack_entry.position
+    local line = { { is_current and "  ▶ " or "    ", "OctoDetailsValue" } }
+    local pr = entry.pullRequest
+    if utils.is_blank(pr) then
+      table.insert(line, { "(not accessible)", "OctoMissingDetails" })
+    else
+      table.insert(
+        line,
+        utils.get_icon {
+          kind = "pull_request",
+          obj = pr --[[@as EntryObject]],
+        }
+      )
+      table.insert(line, { "#" .. tostring(pr.number) .. " ", "OctoDetailsValue" })
+      if is_current then
+        table.insert(line, { pr.title, "OctoDetailsValue" })
+      else
+        table.insert(line, { pr.title })
+      end
+    end
+    table.insert(lines, line)
+  end
+
+  return lines
+end
+
 function M.write_details(bufnr, issue, update, include_status)
   vim.api.nvim_buf_clear_namespace(bufnr, constants.OCTO_DETAILS_VT_NS, 0, -1)
 
