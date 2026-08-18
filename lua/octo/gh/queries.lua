@@ -111,6 +111,8 @@ query($owner: String!, $name: String!, $number: Int!, $endCursor: String) {
   ---@field state octo.PullRequestState
   ---@field isDraft boolean
   ---@field isInMergeQueue boolean
+  ---@field reviewDecision? string
+  ---@field statusCheckRollup? { state: octo.StatusState }
 
   ---@class octo.PullRequestStackEntry
   ---@field position integer 1 is closest to the base branch
@@ -1607,6 +1609,10 @@ query($id: ID!) {
                 state
                 isDraft
                 isInMergeQueue
+                reviewDecision
+                statusCheckRollup {
+                  state
+                }
               }
             }
           }

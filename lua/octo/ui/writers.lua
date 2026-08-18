@@ -714,11 +714,31 @@ local function add_status_detail(details, is_issue, state, state_reason, is_draf
     :write_detail_line(details)
 end
 
---- Write issue or PR details virtual text in buffer
----@param bufnr integer
----@param issue octo.PullRequest|octo.Issue
----@param update? true
----@param include_status? boolean
+-- Badge label and bubble highlight for each stack entry state
+local stack_badge_map = {
+  MERGED = { "MERGED", "OctoStateMergedBubble" },
+  CLOSED = { "CLOSED", "OctoStateClosedBubble" },
+  DRAFT = { "DRAFT", "OctoStateDraftBubble" },
+  QUEUED = { "QUEUED", "OctoStateQueuedBubble" },
+  READY = { "READY", "OctoStateApprovedBubble" },
+  NOT_READY = { "NOT READY", "OctoStatePendingBubble" },
+}
+
+---Badge shown for a PR in a stack listing: the PR state, or its merge
+---readiness (approved reviews and green checks) when it is open.
+---@param pr octo.StackPullRequest
+---@return [string, string][]
+local function stack_badge(pr)
+  local state = utils.get_displayed_state(false, pr.state, nil, pr.isDraft, pr.isInMergeQueue)
+  local badge = stack_badge_map[state]
+  if not badge then
+    local checks_ok = utils.is_blank(pr.statusCheckRollup) or pr.statusCheckRollup.state == "SUCCESS"
+    local review_ok = utils.is_blank(pr.reviewDecision) or pr.reviewDecision == "APPROVED"
+    badge = (checks_ok and review_ok) and stack_badge_map.READY or stack_badge_map.NOT_READY
+  end
+  return bubbles.make_bubble(badge[1], badge[2], { left_margin_width = 1 })
+end
+
 ---Build virtual-text detail lines for the stack a PR belongs to.
 ---Returns an empty list when the PR is not part of a stack.
 ---@param stack_entry? octo.StackEntryHead
@@ -764,6 +784,7 @@ function M.build_stack_details(stack_entry)
       else
         table.insert(line, { pr.title })
       end
+      vim.list_extend(line, stack_badge(pr))
     end
     table.insert(lines, line)
   end
@@ -771,6 +792,11 @@ function M.build_stack_details(stack_entry)
   return lines
 end
 
+--- Write issue or PR details virtual text in buffer
+---@param bufnr integer
+---@param issue octo.PullRequest|octo.Issue
+---@param update? true
+---@param include_status? boolean
 function M.write_details(bufnr, issue, update, include_status)
   vim.api.nvim_buf_clear_namespace(bufnr, constants.OCTO_DETAILS_VT_NS, 0, -1)
 

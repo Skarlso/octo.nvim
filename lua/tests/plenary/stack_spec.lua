@@ -62,7 +62,15 @@ describe("stacked PRs", function()
               },
               {
                 position = 2,
-                pullRequest = { number = 333, title = "Current PR", state = "OPEN", isDraft = false, url = "" },
+                pullRequest = {
+                  number = 333,
+                  title = "Current PR",
+                  state = "OPEN",
+                  isDraft = false,
+                  url = "",
+                  reviewDecision = "APPROVED",
+                  statusCheckRollup = { state = "SUCCESS" },
+                },
               },
             },
           },
@@ -108,6 +116,60 @@ describe("stacked PRs", function()
       local lines = writers.build_stack_details(stack_entry)
       eq(4, #lines)
       assert.is_truthy(line_text(lines[2]):find("not accessible", 1, true))
+    end)
+
+    describe("state badges", function()
+      it("shows MERGED for merged PRs", function()
+        local lines = writers.build_stack_details(make_stack_entry())
+        assert.is_truthy(line_text(lines[4]):find("MERGED", 1, true))
+      end)
+
+      it("shows DRAFT for draft PRs", function()
+        local lines = writers.build_stack_details(make_stack_entry())
+        assert.is_truthy(line_text(lines[2]):find("DRAFT", 1, true))
+      end)
+
+      it("shows READY for open PRs with approved reviews and green checks", function()
+        local lines = writers.build_stack_details(make_stack_entry())
+        local text = line_text(lines[3])
+        assert.is_truthy(text:find("READY", 1, true))
+        assert.is_nil(text:find("NOT READY", 1, true))
+      end)
+
+      it("shows READY for open PRs with no required reviews and no checks", function()
+        local stack_entry = make_stack_entry()
+        stack_entry.stack.entries.nodes[3].pullRequest.reviewDecision = vim.NIL
+        stack_entry.stack.entries.nodes[3].pullRequest.statusCheckRollup = vim.NIL
+        local lines = writers.build_stack_details(stack_entry)
+        local text = line_text(lines[3])
+        assert.is_truthy(text:find("READY", 1, true))
+        assert.is_nil(text:find("NOT READY", 1, true))
+      end)
+
+      it("shows NOT READY when a review is still required", function()
+        local stack_entry = make_stack_entry()
+        stack_entry.stack.entries.nodes[3].pullRequest.reviewDecision = "REVIEW_REQUIRED"
+        local lines = writers.build_stack_details(stack_entry)
+        assert.is_truthy(line_text(lines[3]):find("NOT READY", 1, true))
+      end)
+
+      it("shows NOT READY when checks are failing", function()
+        local stack_entry = make_stack_entry()
+        stack_entry.stack.entries.nodes[3].pullRequest.statusCheckRollup = { state = "FAILURE" }
+        local lines = writers.build_stack_details(stack_entry)
+        assert.is_truthy(line_text(lines[3]):find("NOT READY", 1, true))
+      end)
+    end)
+  end)
+
+  describe("pull_request query stack fields", function()
+    it("fetches per-entry review and check state", function()
+      config.values.github_hostname = ""
+      queries.setup()
+      local sub = queries.pull_request:match "stackEntry %b{}"
+      assert.is_truthy(sub)
+      assert.is_truthy(sub:find("reviewDecision", 1, true))
+      assert.is_truthy(sub:find("statusCheckRollup", 1, true))
     end)
   end)
 end)
