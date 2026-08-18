@@ -714,20 +714,20 @@ local function add_status_detail(details, is_issue, state, state_reason, is_draf
     :write_detail_line(details)
 end
 
--- Badge label and bubble highlight for each stack entry state
+-- Badge label, bubble highlight and matching icon highlight for each stack entry state
 local stack_badge_map = {
-  MERGED = { "MERGED", "OctoStateMergedBubble" },
-  CLOSED = { "CLOSED", "OctoStateClosedBubble" },
-  DRAFT = { "DRAFT", "OctoStateDraftBubble" },
-  QUEUED = { "QUEUED", "OctoStateQueuedBubble" },
-  READY = { "READY", "OctoStateApprovedBubble" },
-  NOT_READY = { "NOT READY", "OctoStatePendingBubble" },
+  MERGED = { "MERGED", "OctoStateMergedBubble", "OctoPurple" },
+  CLOSED = { "CLOSED", "OctoStateClosedBubble", "OctoRed" },
+  DRAFT = { "DRAFT", "OctoStateDraftBubble", "OctoGrey" },
+  QUEUED = { "QUEUED", "OctoStateQueuedBubble", "OctoYellow" },
+  READY = { "READY", "OctoStateApprovedBubble", "OctoGreen" },
+  NOT_READY = { "NOT READY", "OctoStatePendingBubble", "OctoYellow" },
 }
 
 ---Badge shown for a PR in a stack listing: the PR state, or its merge
 ---readiness (approved reviews and green checks) when it is open.
 ---@param pr octo.StackPullRequest
----@return [string, string][]
+---@return { [1]: string, [2]: string, [3]: string } label, bubble hl, icon hl
 local function stack_badge(pr)
   local state = utils.get_displayed_state(false, pr.state, nil, pr.isDraft, pr.isInMergeQueue)
   local badge = stack_badge_map[state]
@@ -736,7 +736,7 @@ local function stack_badge(pr)
     local review_ok = utils.is_blank(pr.reviewDecision) or pr.reviewDecision == "APPROVED"
     badge = (checks_ok and review_ok) and stack_badge_map.READY or stack_badge_map.NOT_READY
   end
-  return bubbles.make_bubble(badge[1], badge[2], { left_margin_width = 1 })
+  return badge
 end
 
 ---Build virtual-text detail lines for the stack a PR belongs to.
@@ -771,20 +771,20 @@ function M.build_stack_details(stack_entry)
     if utils.is_blank(pr) then
       table.insert(line, { "(not accessible)", "OctoMissingDetails" })
     else
-      table.insert(
-        line,
-        utils.get_icon {
-          kind = "pull_request",
-          obj = pr --[[@as EntryObject]],
-        }
-      )
+      local badge = stack_badge(pr)
+      local icon = utils.get_icon {
+        kind = "pull_request",
+        obj = pr --[[@as EntryObject]],
+      }
+      -- keep the state glyph but color it like the badge, matching the GitHub UI
+      table.insert(line, { icon[1], badge[3] })
       table.insert(line, { "#" .. tostring(pr.number) .. " ", "OctoDetailsValue" })
       if is_current then
         table.insert(line, { pr.title, "OctoDetailsValue" })
       else
         table.insert(line, { pr.title })
       end
-      vim.list_extend(line, stack_badge(pr))
+      vim.list_extend(line, bubbles.make_bubble(badge[1], badge[2], { left_margin_width = 1 }))
     end
     table.insert(lines, line)
   end

@@ -159,6 +159,20 @@ describe("stacked PRs", function()
         local lines = writers.build_stack_details(stack_entry)
         assert.is_truthy(line_text(lines[3]):find("NOT READY", 1, true))
       end)
+
+      it("colors the state icon to match the badge", function()
+        local stack_entry = make_stack_entry()
+        stack_entry.stack.entries.nodes[3].pullRequest.reviewDecision = "REVIEW_REQUIRED"
+        local lines = writers.build_stack_details(stack_entry)
+        -- line = { marker, icon, "#number ", title, bubble... }: the icon is chunk 2
+        eq("OctoGrey", lines[2][2][2]) -- draft
+        eq("OctoYellow", lines[3][2][2]) -- open but not ready
+        eq("OctoPurple", lines[4][2][2]) -- merged
+
+        stack_entry.stack.entries.nodes[3].pullRequest.reviewDecision = "APPROVED"
+        lines = writers.build_stack_details(stack_entry)
+        eq("OctoGreen", lines[3][2][2]) -- open and ready
+      end)
     end)
   end)
 
