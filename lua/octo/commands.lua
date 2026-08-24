@@ -656,7 +656,7 @@ function M.setup()
         if buffer and buffer:isPullRequest() then
           navigation.open_in_browser()
         else
-          pcall(vim.cmd, "silent !gh pr view --web")
+          gh.pr.view { web = true }
         end
       end,
       url = function()
