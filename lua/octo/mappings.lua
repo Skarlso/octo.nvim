@@ -373,6 +373,9 @@ return {
   stack_down = function()
     require("octo.navigation").go_to_stack_neighbor(-1)
   end,
+  goto_check = function()
+    require("octo.navigation").go_to_check()
+  end,
   next_comment = function()
     require("octo.navigation").next_comment()
   end,
